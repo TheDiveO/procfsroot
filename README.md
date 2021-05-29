@@ -17,10 +17,12 @@ chasing relative to an enforced root path.
 
 In the following example, the "absolute" path `/var/run/docker.sock` (which
 might be in a different mount namespace) is correctly resolved in the root
-context of `/proc/1/root` – even in case of absolute symbolic links. Trying to
+context of `/proc/1/root` – even in case of absolute symbolic links, such as
+`/var/run` usually being an absolute symlink pointing to `/run`. Trying to
 directly use `/proc/1/root/var/run/docker.sock` will fail in case of different
 mount namespaces between the accessing process and the initial mount namespace
-of the init process PID 1.
+of the init process PID 1, as this would be resolved by the Linux kernel into
+`/run/docker.sock` in the current mount namespace(*).
 
 ```go
 import (
@@ -30,6 +32,14 @@ import (
 
 var f, err := os.Open(
     procfsroot.EvalSymlinks("/var/run/docker.sock", "/proc/1/root", procfsroot.EvalFullPath))
+```
+
+For illustrational purposes, simply run this as an "incontinentainer" to show
+that absolute symbolic path access will fail when done through a wormhole:
+
+```bash
+$ docker run -it --rm --pid=host --privileged busybox ls -l /proc/1/root/var/run/docker.socket
+ls: /proc/1/root/var/run/docker.socket: No such file or directory
 ```
 
 ## Mount Namespace Wormholes
