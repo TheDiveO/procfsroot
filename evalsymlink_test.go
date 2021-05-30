@@ -91,7 +91,7 @@ var _ = Describe("evil symlink chasing", func() {
 		Expect(err).NotTo(HaveOccurred())
 		Expect(p).To(Equal("/run"))
 
-		Errxpect(EvalSymlinks("/proc/1/root", "/", EvalFullPath)).
+		Errxpect(EvalSymlinks("/proc/foobar1/root", "/", EvalFullPath)).
 			To(HaveOccurred())
 	})
 
