@@ -26,6 +26,8 @@ import (
 // last path component when evaluating (chasing) symbolic links along a path.
 type EvalSymlinkPathHandling = uint8
 
+// Symlink evaluation of the last path component can either be enabled or
+// disabled. All preceding path components will always be evaluated (resolved).
 const (
 	EvalFullPath   EvalSymlinkPathHandling = iota // evaluate all path components.
 	EvalExceptLast                                // evaluate all but the last path component.

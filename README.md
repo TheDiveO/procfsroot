@@ -1,5 +1,10 @@
 # ProcfsRoot
 
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/thediveo/procfsroot)](https://pkg.go.dev/github.com/thediveo/procfsroot)
+[![GitHub](https://img.shields.io/github/license/thediveo/procfsroot)](https://img.shields.io/github/license/thediveo/procfsroot)
+![build and test](https://github.com/thediveo/procfsroot/workflows/build%20and%20test/badge.svg?branch=master)
+[![Go Report Card](https://goreportcard.com/badge/github.com/thediveo/procfsroot)](https://goreportcard.com/report/github.com/thediveo/procfsroot)
+
 `procfsroot` is a small Go module that helps with accessing file system paths
 containing absolute symbolic links that are to be taken relative (sic!) to a
 particular root path. A good example is accessing paths inside
@@ -30,8 +35,16 @@ import (
     "github.com/thediveo/procfsroot"
 )
 
-var f, err := os.Open(
-    procfsroot.EvalSymlinks("/var/run/docker.sock", "/proc/1/root", procfsroot.EvalFullPath))
+const root := "/proc/1/root"
+
+func main() {
+    p, err := procfsroot.EvalSymlinks("/var/run/docker.sock", root, procfsroot.EvalFullPath)
+    if err != nil {
+        panic(err)
+    }
+    f, err := os.Open(root + p)
+    defer f.Close()
+}
 ```
 
 For illustrational purposes, simply run this as an "incontinentainer" to show
