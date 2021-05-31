@@ -21,7 +21,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestWhalewatcher(t *testing.T) {
+func TestProcfsroot(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "procfsroot package")
 }
