@@ -19,7 +19,6 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	. "github.com/thediveo/errxpect"
 )
 
 const fsroot = "./test/root"
@@ -43,11 +42,11 @@ var _ = Describe("evil symlink chasing", func() {
 		Expect(err).NotTo(HaveOccurred())
 		Expect(p).To(Equal("/a"))
 
-		Errxpect(EvalSymlinks("/a/b.txt/c", fsroot, EvalFullPath)).
-			To(HaveOccurred())
+		Expect(EvalSymlinks("/a/b.txt/c", fsroot, EvalFullPath)).
+			Error().To(HaveOccurred())
 
-		Errxpect(EvalSymlinks("/a/zzz/b.txt", fsroot, EvalFullPath)).
-			To(HaveOccurred())
+		Expect(EvalSymlinks("/a/zzz/b.txt", fsroot, EvalFullPath)).
+			Error().To(HaveOccurred())
 
 		p, err = EvalSymlinks("//a//", fsroot, EvalFullPath)
 		Expect(err).NotTo(HaveOccurred())
@@ -69,13 +68,13 @@ var _ = Describe("evil symlink chasing", func() {
 	})
 
 	It("expects file path elements to exist", func() {
-		Errxpect(EvalSymlinks("/a/zzz/whateverelse", fsroot, EvalFullPath)).
-			To(HaveOccurred())
+		Expect(EvalSymlinks("/a/zzz/whateverelse", fsroot, EvalFullPath)).
+			Error().To(HaveOccurred())
 	})
 
 	It("optionally accepts missing target", func() {
-		Errxpect(EvalSymlinks("/a/zzz.txt", fsroot, EvalFullPath)).
-			To(HaveOccurred())
+		Expect(EvalSymlinks("/a/zzz.txt", fsroot, EvalFullPath)).
+			Error().To(HaveOccurred())
 
 		p, err := EvalSymlinks("/a/zzz.txt", fsroot, EvalExceptLast)
 		Expect(err).NotTo(HaveOccurred())
@@ -91,25 +90,25 @@ var _ = Describe("evil symlink chasing", func() {
 		Expect(err).NotTo(HaveOccurred())
 		Expect(p).To(Equal("/run"))
 
-		Errxpect(EvalSymlinks("/proc/foobar1/root", "/", EvalFullPath)).
-			To(HaveOccurred())
+		Expect(EvalSymlinks("/proc/foobar1/root", "/", EvalFullPath)).
+			Error().To(HaveOccurred())
 	})
 
 	It("stays inside the wormhole", func() {
-		Errxpect(EvalSymlinks("/../foo", fsroot, EvalFullPath)).
-			To(MatchError(ContainSubstring("no parent directory")))
+		Expect(EvalSymlinks("/../foo", fsroot, EvalFullPath)).
+			Error().To(MatchError(ContainSubstring("no parent directory")))
 
-		Errxpect(EvalSymlinks("/a/d/../../../foo", fsroot, EvalFullPath)).
-			To(MatchError(ContainSubstring("no parent directory")))
+		Expect(EvalSymlinks("/a/d/../../../foo", fsroot, EvalFullPath)).
+			Error().To(MatchError(ContainSubstring("no parent directory")))
 
-		Errxpect(EvalSymlinks("/unrooter/tryingtoleavethebox", fsroot, EvalFullPath)).
-			To(MatchError(ContainSubstring("no parent directory")))
+		Expect(EvalSymlinks("/unrooter/tryingtoleavethebox", fsroot, EvalFullPath)).
+			Error().To(MatchError(ContainSubstring("no parent directory")))
 	})
 
 	It("doesn't follow endlessly", func() {
 		ouroboros := strings.Repeat("/proc/self/root", 256*2)
-		Errxpect(EvalSymlinks(ouroboros, "/proc/self/root", EvalFullPath)).
-			To(MatchError(ContainSubstring("too many symlinks")))
+		Expect(EvalSymlinks(ouroboros, "/proc/self/root", EvalFullPath)).
+			Error().To(MatchError(ContainSubstring("too many symlinks")))
 	})
 
 })
