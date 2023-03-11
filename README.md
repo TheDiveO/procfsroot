@@ -4,6 +4,7 @@
 [![GitHub](https://img.shields.io/github/license/thediveo/procfsroot)](https://img.shields.io/github/license/thediveo/procfsroot)
 ![build and test](https://github.com/thediveo/procfsroot/workflows/build%20and%20test/badge.svg?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/thediveo/procfsroot)](https://goreportcard.com/report/github.com/thediveo/procfsroot)
+![Coverage](https://img.shields.io/badge/Coverage-96.8%25-brightgreen)
 
 `procfsroot` is a small Go module that helps with accessing file system paths
 containing absolute symbolic links that are to be taken relative (sic!) to a
@@ -81,4 +82,4 @@ PID namespace is "gold standard".
 
 ## Copyright and License
 
-Copyright 2021 Harald Albrecht, licensed under the Apache License, Version 2.0.
+Copyright 2021-23 Harald Albrecht, licensed under the Apache License, Version 2.0.
