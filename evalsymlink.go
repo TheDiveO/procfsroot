@@ -16,7 +16,7 @@ package procfsroot
 
 import (
 	"errors"
-	"os"
+	"io/fs"
 	"path"
 	"syscall"
 )
@@ -121,8 +121,7 @@ func EvalSymlinks(abspath, root string, pathhandling EvalSymlinkPathHandling) (s
 		if err != nil {
 			return "", err
 		}
-		// For compatibility with pre-1.16 use "os" instead of "fs"
-		if stat.Mode()&os.ModeSymlink == 0 {
+		if stat.Mode()&fs.ModeSymlink == 0 {
 			// Phew, ain't no symlink, so to ensure that -- with the exception
 			// of the final component -- all other components are directories,
 			// we check this path component if necessary.
