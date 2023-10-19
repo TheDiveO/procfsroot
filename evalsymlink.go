@@ -117,7 +117,7 @@ func EvalSymlinks(abspath, root string, pathhandling EvalSymlinkPathHandling) (s
 			break
 		}
 		wormpath := root + dest
-		stat, err := os.Lstat(wormpath)
+		stat, err := slinker.Lstat(wormpath)
 		if err != nil {
 			return "", err
 		}
@@ -138,7 +138,7 @@ func EvalSymlinks(abspath, root string, pathhandling EvalSymlinkPathHandling) (s
 		if jumps > 255 {
 			return "", errors.New("procfsroot.EvalSymlinks: too many symlinks")
 		}
-		link, err := os.Readlink(wormpath)
+		link, err := slinker.Readlink(wormpath)
 		if err != nil {
 			return "", err
 		}
