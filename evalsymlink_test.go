@@ -15,15 +15,62 @@
 package procfsroot
 
 import (
+	"os"
 	"strings"
+
+	"github.com/spf13/afero"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/thediveo/success"
 )
 
-const fsroot = "./test/root"
+const fsroot = "/root" // ...somewhere inside our temporary testing directory
 
-var _ = Describe("evil symlink chasing", func() {
+func createFile(fs afero.Fs, name string, contents string) {
+	GinkgoHelper()
+	f := Successful(fs.Create(name))
+	defer f.Close()
+	Expect(f.WriteString(contents)).Error().NotTo(HaveOccurred())
+}
+
+var _ = Describe("evil symlink chasing", Ordered, func() {
+
+	BeforeAll(func() {
+		oldslinker := slinker
+		DeferCleanup(func() { slinker = oldslinker })
+
+		tmpDir := Successful(os.MkdirTemp("", "test-evilsymlink-"))
+		DeferCleanup(func() {
+			Expect(os.RemoveAll(tmpDir)).To(Succeed())
+		})
+
+		testfs := afero.NewBasePathFs(afero.NewOsFs(), tmpDir)
+		slinker = &aferoSymlinker{testfs}
+
+		createFile(testfs, "/outofreach.txt", "This file must off-limits for symlinks inside /root")
+
+		Expect(testfs.MkdirAll(fsroot+"/a", 0770)).To(Succeed())
+		createFile(testfs, fsroot+"/a/b.txt", "just some text")
+		Expect(testfs.MkdirAll(fsroot+"/a/d", 0770)).To(Succeed())
+		createFile(testfs, fsroot+"/a/d/dummy.txt", "better than .gitkeep")
+
+		// Hack around afero.BasePathFs trying to make relative symlinks
+		// absolute ... something we absolutely don't need here.
+		Expect(os.Symlink("a/b.txt",
+			Successful(testfs.(*afero.BasePathFs).RealPath(fsroot+"/relsymlink")))).
+			To(Succeed())
+
+		Expect(testfs.MkdirAll(fsroot+"/unrooter", 0770)).To(Succeed())
+		Expect(os.Symlink("../../outofreach.txt",
+			Successful(testfs.(*afero.BasePathFs).RealPath(fsroot+"/unrooter/tryingtoleavethebox")))).
+			To(Succeed())
+
+		Expect(testfs.MkdirAll("/proc/self", 0770)).To(Succeed())
+		Expect(os.Symlink("../..",
+			Successful(testfs.(*afero.BasePathFs).RealPath("/proc/self/root")))).
+			To(Succeed())
+	})
 
 	It("handles simple paths", func() {
 		p, err := EvalSymlinks("/a/b.txt", fsroot, EvalFullPath)
@@ -85,13 +132,6 @@ var _ = Describe("evil symlink chasing", func() {
 		p, err := EvalSymlinks("/relsymlink", fsroot, EvalFullPath)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(p).To(Equal("/a/b.txt"))
-
-		p, err = EvalSymlinks("/var/run", "/", EvalFullPath)
-		Expect(err).NotTo(HaveOccurred())
-		Expect(p).To(Equal("/run"))
-
-		Expect(EvalSymlinks("/proc/foobar1/root", "/", EvalFullPath)).
-			Error().To(HaveOccurred())
 	})
 
 	It("stays inside the wormhole", func() {
