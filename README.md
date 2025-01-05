@@ -2,7 +2,7 @@
 
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/thediveo/procfsroot)](https://pkg.go.dev/github.com/thediveo/procfsroot)
 [![GitHub](https://img.shields.io/github/license/thediveo/procfsroot)](https://img.shields.io/github/license/thediveo/procfsroot)
-![build and test](https://github.com/thediveo/procfsroot/workflows/build%20and%20test/badge.svg?branch=master)
+![build and test](https://github.com/thediveo/procfsroot/actions/workflows/buildandtest.yaml/badge.svg?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/thediveo/procfsroot)](https://goreportcard.com/report/github.com/thediveo/procfsroot)
 ![Coverage](https://img.shields.io/badge/Coverage-96.9%25-brightgreen)
 
@@ -13,6 +13,9 @@ particular root path. A good example is accessing paths inside
 system](https://man7.org/linux/man-pages/man5/proc.5.html). Symbolic links are
 properly resolved and kept inside a given root path, prohibiting rogue relative
 symbolic links from breaking out of a procfs root wormhole.
+
+For devcontainer instructions, please see the [section "DevContainer"
+below](#devcontainer).
 
 ## Usage
 
@@ -80,6 +83,37 @@ Also, for access to `/proc/[PID]` the current process needs to be in a suitable
 that includes the PID of a "target" process of interest. Of course, the initial
 PID namespace is "gold standard".
 
+## DevContainer
+
+> [!CAUTION]
+>
+> Do **not** use VSCode's "~~Dev Containers: Clone Repository in Container
+> Volume~~" command, as it is utterly broken by design, ignoring
+> `.devcontainer/devcontainer.json`.
+
+1. `git clone https://github.com/thediveo/procfsroot`
+2. in VSCode: Ctrl+Shift+P, "Dev Containers: Open Workspace in Container..."
+3. select `enumflag.code-workspace` and off you go...
+
+## VSCode Tasks
+
+The included `procfsroot.code-workspace` defines the following tasks:
+
+- **Build workspace** task: builds all, including the shared library test
+  plugin.
+
+- **Run all tests with coverage** task: does what it says on the tin and runs
+  all tests with coverage.
+
+## Make Targets
+
+- `make`: lists available targets.
+- `make test`: runs all tests.
+- `make coverage`: deprecated, use the `gocover` CLI command in the devcontainer
+  instead.
+- `make report`: deprecated, use the `goreportcard-cli` CLI command in the
+  devcontainer instead.
+
 ## Copyright and License
 
-Copyright 2021-23 Harald Albrecht, licensed under the Apache License, Version 2.0.
+Copyright 2021, 2025 Harald Albrecht, licensed under the Apache License, Version 2.0.
